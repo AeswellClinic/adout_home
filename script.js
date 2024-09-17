@@ -1,69 +1,75 @@
 document.addEventListener("DOMContentLoaded", function() {
     const carousel = document.querySelector(".carousel");
-    const arrowBtns = document.querySelectorAll(".wrapper i");
-    const wrapper = document.querySelector(".wrapper");
-  
+    const leftArrow = document.querySelector("#left");
+    const rightArrow = document.querySelector("#right");
     const firstCard = carousel.querySelector(".card");
-    const firstCardWidth = firstCard.offsetWidth;
-  
+    let firstCardWidth = firstCard.offsetWidth;
+
     let isDragging = false,
         startX,
         startScrollLeft;
-  
-    const dragStart = (e) => {
-        isDragging = true;
-        carousel.classList.add("dragging");
-        startX = e.pageX;
-        startScrollLeft = carousel.scrollLeft;
-    };
-  
-    const dragging = (e) => {
-        if (!isDragging) return;
-  
-        const newScrollLeft = startScrollLeft - (e.pageX - startX);
-  
-        if (newScrollLeft <= 0 || newScrollLeft >=
-            carousel.scrollWidth - carousel.offsetWidth) {
-            isDragging = false;
-            return;
-        }
-  
-        carousel.scrollLeft = newScrollLeft;
-    };
-  
-    const dragStop = () => {
-        isDragging = false;
-        carousel.classList.remove("dragging");
-        checkButtons();
-    };
-  
+
+
+    leftArrow.style.visibility = 'hidden';
+
+
     const checkButtons = () => {
         const maxScrollLeft = carousel.scrollWidth - carousel.offsetWidth;
+        const tolerance = 5;
+
+  
         if (carousel.scrollLeft <= 0) {
-            arrowBtns[0].classList.add('disabled');
+            leftArrow.style.visibility = 'hidden';
         } else {
-            arrowBtns[0].classList.remove('disabled');
+            leftArrow.style.visibility = 'visible';
         }
-        if (carousel.scrollLeft >= maxScrollLeft) {
-            arrowBtns[1].classList.add('disabled');
+
+       
+        if (carousel.scrollLeft >= maxScrollLeft - tolerance) {
+            rightArrow.style.visibility = 'hidden';
         } else {
-            arrowBtns[1].classList.remove('disabled');
+            rightArrow.style.visibility = 'visible';
         }
     };
-  
-    carousel.addEventListener("mousedown", dragStart);
-    carousel.addEventListener("mousemove", dragging);
-    document.addEventListener("mouseup", dragStop);
-  
-    arrowBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            if (!btn.classList.contains('disabled')) {
-                let scrollAmount = firstCardWidth * (window.innerWidth <= 480 ? 1 : 2);
-                carousel.scrollLeft += btn.id === "left" ? -scrollAmount : scrollAmount;
-                checkButtons();
-            }
-        });
-    });
-  
+
+    
     checkButtons();
+
+
+    window.addEventListener('resize', () => {
+        firstCardWidth = firstCard.offsetWidth; 
+        checkButtons();
+    });
+
+   
+    rightArrow.addEventListener("click", () => {
+        let scrollAmount = firstCardWidth * (window.innerWidth <= 480 ? 1 : 2);
+        carousel.scrollLeft += scrollAmount;
+        checkButtons();
+    });
+
+
+    leftArrow.addEventListener("click", () => {
+        let scrollAmount = firstCardWidth * (window.innerWidth <= 480 ? 1 : 2);
+        carousel.scrollLeft -= scrollAmount;
+        checkButtons();
+    });
+
+
+    carousel.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.pageX;
+        startScrollLeft = carousel.scrollLeft;
+    });
+
+    carousel.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const newScrollLeft = startScrollLeft - (e.pageX - startX);
+        carousel.scrollLeft = newScrollLeft;
+    });
+
+    document.addEventListener("mouseup", () => {
+        isDragging = false;
+        checkButtons();
+    });
 });
